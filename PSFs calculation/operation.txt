@@ -1,0 +1,4 @@
+compile traveltime_2d.f and run : get the results of traveltime
+
+compile calculate_psf_test.f and run : get the PSFs
+
