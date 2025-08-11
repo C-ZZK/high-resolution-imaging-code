@@ -24,8 +24,8 @@ class Dataset(dataset.Dataset):
         self.mode = mode
         self.cropsize = cropsize
         self.cropsize1 = cropsize
-        self.kernelsize_z = 30
-        self.kernelsize_x = 30
+        self.kernelsize_z = kernel.shape[0]
+        self.kernelsize_x = kernel.shape[1]
         random1 = np.random.RandomState(0)
 
         self.seed = random1.randint(100000, size=num)
@@ -46,12 +46,13 @@ class Dataset(dataset.Dataset):
         h1,w1 = np.shape(target)
         kernelsize_z =self.kernelsize_z
         kernelsize_x =self.kernelsize_x
-        hpsf = random.randint(0, 15)
-        wpsf = random.randint(0, 44)
-        ipsf =random.randint(0, 719)
+        # hpsf = random.randint(0, 8)
+        # wpsf = random.randint(0, 19)
+        npsf = Kernel.shape[2]
+        ipsf = random.randint(50,50)
         if self.mode == 'train':
 
-            Kernel = Kernel[0:kernelsize_z, 0:kernelsize_x, ipsf]
+            Kernel = Kernel[:,:,ipsf]
             Kernel = Kernel / (np.max(np.abs(Kernel)) + 0.000000001)
             
             hstar = random.randint(0, h-self.cropsize)
@@ -65,14 +66,12 @@ class Dataset(dataset.Dataset):
             w1star = random.randint(0, w1 - self.cropsize1)
             target = target[h1star:h1star + self.cropsize1, w1star:w1star + self.cropsize1]
             target = target / (np.max(np.abs(target)) + 0.000000001)
-            data = scipy.signal.convolve2d(data, Kernel, mode='same')
+            data = scipy.signal.convolve(data, Kernel, mode='same',method='fft')
             data = data / (np.max(np.abs(data)) + 0.000000001)
 
-            data2 = np.zeros((self.cropsize, self.cropsize))
-            for tt in range(self.cropsize):
-                data2[:, tt] = data[:, tt] + 0* max(abs(data[:, tt])) * np.random.normal(0, 1, self.cropsize)
+
             
-            data = np.reshape(data2, (1, self.cropsize, self.cropsize)).astype(np.float32)
+            data = np.reshape(data, (1, self.cropsize, self.cropsize)).astype(np.float32)
             ref2 = np.reshape(ref2, (1, self.cropsize, self.cropsize)).astype(np.float32)
             target = np.reshape(target, (1, self.cropsize, self.cropsize)).astype(np.float32)
 
@@ -80,7 +79,7 @@ class Dataset(dataset.Dataset):
         
         else:
            
-            Kernel = Kernel[0:kernelsize_z, 0:kernelsize_x, ipsf]
+            Kernel = Kernel[:,:,ipsf]
             Kernel = Kernel / (np.max(np.abs(Kernel)) + 0.000000001)
             random1 = np.random.RandomState(self.seed[index])
             hstar = random1.randint(0, h - self.cropsize)
@@ -96,16 +95,16 @@ class Dataset(dataset.Dataset):
             target = target[h1star:h1star + self.cropsize, w1star:w1star + self.cropsize]
             target = target / (np.max(np.abs(target)) + 0.000000001)
 
-            data = scipy.signal.convolve2d(data, Kernel, mode='same')
+            data = scipy.signal.convolve(data, Kernel, mode='same',method='fft')
             data = data / (np.max(np.abs(data)) + 0.000000001)        
             data2 = np.zeros((self.cropsize, self.cropsize))
             for tt in range(self.cropsize):
                 data2[:, tt] = data[:, tt] + 0 * max(abs(data[:, tt])) * np.random.normal(0, 1, self.cropsize)
            
-            data = np.reshape(data2, (1, self.cropsize, self.cropsize)).astype(np.float32)
+            data = np.reshape(data, (1, self.cropsize, self.cropsize)).astype(np.float32)
             ref2 = np.reshape(ref2, (1, self.cropsize, self.cropsize)).astype(np.float32)
             target = np.reshape(target, (1, self.cropsize, self.cropsize)).astype(np.float32)
-            return data, ref2
+            return data, ref2,target
 
 
 

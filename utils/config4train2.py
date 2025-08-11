@@ -17,7 +17,7 @@ class Config:
     num_workers = 1
 
     # param for optimizer
-    weight_decay = 0#权重衰减默认0
+    weight_decay = 0 #权重衰减默认0
     lr_decay = 0.1  # 1e-3 -> 1e-4
     lr = 1e-4  # 1e-3#学习率
     lr_step = 2*500  #128:7  56
@@ -27,7 +27,7 @@ class Config:
     train_batch_size = 60
     test_batch_size = 1
 
-    test_num = 1000
+    test_num = 100
     # model
     test_only = False
     load_net = False#'D:/Migration0628/checkpoints/Unet128_sigb2_0.006515013894531876.pth'

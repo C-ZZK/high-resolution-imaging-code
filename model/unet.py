@@ -36,7 +36,7 @@ class UNet(nn.Module):
     '''
     def __init__(self, num_input_channels=3, num_output_channels=3, 
                        feature_scale=4, more_layers=0, concat_x=False,
-                       upsample_mode='deconv', pad='zero', norm_layer=nn.InstanceNorm2d, need_sigmoid=True, need_bias=True):
+                       upsample_mode='deconv', pad='zero', norm_layer=nn.InstanceNorm2d, need_sigmoid=False, need_relu=True,need_bias=True):
         super(UNet, self).__init__()
 
         self.feature_scale = feature_scale
@@ -74,6 +74,8 @@ class UNet(nn.Module):
         if need_sigmoid: 
             self.final = nn.Sequential(self.final, nn.Sigmoid())
 
+        if need_relu:
+            self.final = nn.Sequential(self.final, nn.ReLU())
     def forward(self, inputs):
 
         # Downsample 

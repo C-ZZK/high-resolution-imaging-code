@@ -1,3 +1,5 @@
+# -*- coding: utf-8 -*-
+# --- 1. IMPORTS ---
 import cv2
 import numpy as np
 from utils.config import opt
@@ -7,8 +9,20 @@ import torch
 import os
 from scipy.io import savemat
 from scipy.signal import butter, filtfilt
+import scipy.signal
 
+# --- 2. FUNCTIONS ---
 def test_model(data, model):
+    """
+    Runs inference on a single data patch using the provided model.
+
+    Args:
+        data (np.ndarray): The input data patch, expected to be pre-processed.
+        model (InpTrainer): The trainer object containing the loaded neural network.
+
+    Returns:
+        np.ndarray: The output patch from the model.
+    """
     model.eval()
     data = torch.tensor(data)
 
@@ -18,31 +32,41 @@ def test_model(data, model):
     return outimg
 
 
-
+# --- 3. MAIN EXECUTION BLOCK ---
 if __name__ == '__main__':
-    opt._parse()
+    # opt._parse()
     
-    test = io.loadmat('./data/image.mat')["image"]
-    test = test / np.max(np.abs(test))
+    # opt._parse() # A call to parse command-line arguments, currently commented out.
+    
+    # --- 1. DATA LOADING ---
+    # Load the target area data (e.g., a large seismic image).
+    nz = 1500
+    nx = 1751  
+
+    test_RTM = np.fromfile('./data/seam/seam_mig.dat', dtype=np.float32)
+    test = test_RTM.reshape((nz, nx), order='F') 
+    # --- 2. SETUP AND MODEL INITIALIZATION ---
+    # Define the directory to save the final result.   
     saveroot = './testresult/'
-    # saveroot = './testresult/model_mar_581x1501'
     if not os.path.exists(saveroot):
         os.makedirs(saveroot)
-    modelpath = './checkpointsfor_mar/Unet__0.011069189310073852.pth'
+    
+    modelpath = './checkpoints4train/Network_36.pth'
+
+    if not os.path.exists(modelpath):
+        print("error")
+    else:
+        print(f"modelpath is:{modelpath}")
+    
     model = InpTrainer(opt)
     model.load_net(modelpath)
     h, w = np.shape(test)
-    print(h)
-    print(w)
     cropsize = 128
-    step = 16
+    step = 16  
     numh = (h-cropsize-1)//step+2
     numw = (w-cropsize-1)//step+2
-    print(numh)
-    print(numw)
     result = np.zeros((h, w))
     weight = np.zeros((h, w))
-    r = 20
 
     for hh in range(numh):
         for ww in range(numw):
@@ -70,53 +94,44 @@ if __name__ == '__main__':
             #-------------------------------
             if hh == 0:
                 haa = 0
-                hbb = hstar + cropsize - r
+                hbb = hstar + cropsize
                 haa1 = 0
-                hbb1 = cropsize-r
+                hbb1 = cropsize
             elif hh == numh - 1:
-                haa = hstar + r
+                haa = hstar
                 hbb = h
-                haa1 = r
+                haa1 = 0
                 hbb1 = cropsize
             else:
-                haa = hstar+r
-                hbb = hstar+cropsize-r
-                haa1 = r
-                hbb1 = cropsize-r
+                haa = hstar
+                hbb = hstar+cropsize
+                haa1 = 0
+                hbb1 = cropsize
 
 
             if ww == 0:
                 waa = 0
-                wbb = wstar + cropsize - r
+                wbb = wstar + cropsize
                 waa1 = 0
-                wbb1 = cropsize - r
+                wbb1 = cropsize
             elif ww == numw - 1:
-                waa = wstar + r
+                waa = wstar
                 wbb = w
-                waa1 = r
+                waa1 = 0
                 wbb1 = cropsize
             else:
-                waa = wstar + r
-                wbb = wstar + cropsize - r
-                waa1 = r
-                wbb1 = cropsize-r
+                waa = wstar 
+                wbb = wstar + cropsize 
+                waa1 = 0
+                wbb1 = cropsize
 
             result[haa:hbb,waa:wbb] = result[haa:hbb,waa:wbb]+out[haa1:hbb1, waa1:wbb1]*scale
             weight[haa:hbb,waa:wbb] = weight[haa:hbb,waa:wbb]+np.ones((hbb-haa,wbb-waa))
 
-
+    # --- D. FINALIZE AND SAVE THE RESULT ---
     result = result/(weight+0.0000001)
-         
-    io.savemat(saveroot+'deblur_mar.mat',{'result':result})
-    inputimg = ((test+1)*255/2).astype(np.uint8)
-    outimg = result / np.max(np.abs(result))
-    outimg = ((outimg+1)*255/2).astype(np.uint8)
-
-    # cv2.imwrite(saveroot +'output.jpg', outimg)
-    # cv2.imwrite(saveroot + 'input.jpg', inputimg)
-    
-    # ref = io.loadmat('./data/mar_ref_75hz.mat')["mar_ref"]
-    # ref = ref / np.max(np.abs(ref))
-    # ref_cop = ((ref+1)*255/2).astype(np.uint8)
-    
-    
+    result[test == 0] = 0
+    result = result.astype(np.float32)
+       
+    result = result.transpose()
+    result.tofile(saveroot+'result_seam.dat')
