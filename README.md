@@ -1,4 +1,4 @@
-<img width="1744" height="824" alt="image" src="https://github.com/user-attachments/assets/ccdcb7ac-686c-4450-8b8d-300f236107f8" /><img src="https://github.com/C-ZZK/high-resolution-imaging-code/blob/main/Figure4.png" width="600">
+<img src="https://github.com/C-ZZK/high-resolution-imaging-code/blob/main/Figure4.png" width="600">
 
 ## Description
 
@@ -7,16 +7,11 @@ DA-ID-LSM is a Python framework for Domain-Adaptive Image-Domain Least-Squares M
 
 ## Installation
 
-git clone https://github.com/C-ZZK/high-resolution-imaging-code.git
-
-cd high-resolution-imaging-code
-
-pip install -r requirements.txt
+pip install high-resolution-imaging-code
 
 ## Requirements
 
 - numpy
-- PyTorch
 - matplotlib
 - scipy
 - PIL
@@ -26,8 +21,11 @@ pip install -r requirements.txt
 - OpenCV-Python
   
 Language: Python 3.8 or higher
-Framework: PyTorch 1.8.0  or higher
 
+Framework: PyTorch 1.8.0  or higher
+```python
+pip3 install torch torchvision --index-url https://download.pytorch.org/whl/cu126
+```
 ## Usage
 
 The workflow of DA-ID-LSM is shown in the figure below. Migrated images from both synthetic (source) and field (target) domains are fed into the U-Net. The network's training is guided by two loss functions: a Mean Squared Error (MSE) loss to ensure accurate reconstruction of the synthetic data against its true reflectivity label, and an MMD loss to align the feature distributions of the source and target domain outputs.
@@ -53,11 +51,12 @@ For the scripts to run correctly, please organize your project directory as foll
 │   ├── config4train2.py    # hyperparameter for  train
 │   ├── dataset2.py         # dataset function
 │   ├── mmd.py              # MMD function
-│   └── ormsby.py           # ormsby wavelet 
+│   └── ormsby.py           # ormsby wavelet
+├── DA-ID-LSM
+│   ├── train.py                # Script to train the model
+│   └── test.py                 # Script to apply the model for testing
 ├── result/                 # Output directory for train.py (loss plot, intermediate test images)
 ├── testresult/             # Output directory for the final result from test.py
-├── train.py                # Script to train the model
-├── test.py                 # Script to apply the model for testing
 └── README.md               # This file
 ```
 Note: The model/ and utils/ directories, which contain the model implementation and helper functions, must be created and populated with the necessary scripts.
@@ -110,7 +109,7 @@ PSFBz = 11    # PSF_Initial   Central coordinate
 
 ```
 # Loss function 
- Loss function in the trainer.py,loss1 is MSE loss, loss2 is MMD loss.
+ Loss function in the trainer.py, loss1 is MSE loss, loss2 is MMD loss.
  ```python
  loss1 = self.lossMSE(outimg, ref)
  loss2 = self.lossmmd(data_out,target1)
@@ -146,7 +145,7 @@ The final high-resolution output will be saved as a binary .dat file (result_sea
 ## 3. Visualize the results (deconvPythonShow.py)
 To visualize the results, run the deconvPythonShow.py script located in the ./data/seam/ . This will generate four images: the conventional RTM result, the ID-LSM result, the DA-ID-LSM result, and the true reflectivity model.
 ```python
-cd ./data/seam/]
+cd ./data/seam/
 
 python deconvPythonShow.py
 ```
