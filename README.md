@@ -14,7 +14,6 @@ pip install -r requirements.txt
 ## Requirements
 
 - numpy
-- os
 - PyTorch
 - matplotlib
 - scipy
@@ -29,11 +28,10 @@ Framework: PyTorch 1.8.0  or higher
 
 ## Usage
 
+The workflow of DA-ID-LSM is shown in the figure below. Migrated images from both synthetic (source) and field (target) domains are fed into the U-Net. The network's training is guided by two loss functions: a Mean Squared Error (MSE) loss to ensure accurate reconstruction of the synthetic data against its true reflectivity label, and an MMD loss to align the feature distributions of the source and target domain outputs.
 <img src="https://github.com/C-ZZK/high-resolution-imaging-code/blob/main/Figure1.png" width="600">
 
-The workflow of DA-ID-LSM is shown in the figure below. Migrated images from both synthetic (source) and field (target) domains are fed into the U-Net. The network's training is guided by two loss functions: a Mean Squared Error (MSE) loss to ensure accurate reconstruction of the synthetic data against its true reflectivity label, and an MMD loss to align the feature distributions of the source and target domain outputs.
-
-1. Training the Model
+## 1. Training the Model(train.py)
 To run the below cells, you must first import the library:
 
 ```python
@@ -70,18 +68,37 @@ cropsize = 128   # cropsize
 num_train_dataset = 5000  # dataset of train
 num_test_dataset = 2000   # dataset of validation
 batch_size = 20  # train batch_size
+PSFLx = 21    # Central coordinate interval
+PSFLz = 21   # Central coordinate interval
+PSFSx = 11    # PSF_Scale 
+PSFSz = 11    # PSF_Scale   
+PSFNx = 84    # PSF_Number  
+PSFNz = 72    # PSF_Number  
+PSFBx = 11    # PSF_Initial  Central coordinate
+PSFBz = 11    # PSF_Initial   Central coordinate
 
 ```
 # Execute the training script
-python train.py
-
-The initial Channel object can be created using the 'generate_initial_channel' function. This creates a straight line, with some noise added. However, a Channel can be created (and then used as the first channel in a ChannelBelt) using any set of x,y,z,W,D variables.
-
 ```python
-ch = mp.generate_initial_channel(W, depths[0], Sl, deltas, pad, n_bends) # initialize channel
-chb = mp.ChannelBelt(channels=[ch], cutoffs=[], cl_times=[0.0], cutoff_times=[]) # create channel belt object
+python train.py
 ```
 
+## 2. Testing the Model (test.py)
+The testing script applies a trained model to a large target image (e.g., model_image_1501x1751.dat). It uses a sliding window to process the image patch by patch and stitches the results together.
+
+Before running, you must update test.py to point to your trained model checkpoint.
+
+The initial Channel object can be created using the 'generate_initial_channel' function. This creates a straight line, with some noise added. However, a Channel can be created (and then used as the first channel in a ChannelBelt) using any set of x,y,z,W,D variables.
+# Inside test.py, set the path to your trained model
+modelpath = './checkpoints4train/Network_36.pth'
+
+Execute the test script from your terminal:
+```python
+python test.py
+```
+The final high-resolution output will be saved as a binary .dat file (result_seam.dat) in the testresult/ directory. The image below shows an example of a low-resolution input and the corresponding high-resolution output from the model.
+<img src="https://github.com/C-ZZK/high-resolution-imaging-code/blob/main/Figure2.png" width="600">
+<img src="https://github.com/C-ZZK/high-resolution-imaging-code/blob/main/Figure3.png" width="600">
 The core functionality of 'meanderpy' is built into the 'migrate' method of the 'ChannelBelt' class. This is the function that computes migration rates and moves the channel centerline to its new position. The last Channel of a ChannelBelt can be further migrated through applying the 'migrate' method to the ChannelBelt instance.
 
 ```python
