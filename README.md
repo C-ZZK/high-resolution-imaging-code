@@ -1,4 +1,4 @@
-<img src="https://raw.githubusercontent.com/zsylvester/meanderpy/755e95a8a87c82df6384694e0192fc8a02af4782/meanderpy_logo.svg" width="300">
+<img src="https://github.com/C-ZZK/high-resolution-imaging-code/blob/main/Figure4.png" width="600">
 
 ## Description
 
@@ -30,6 +30,35 @@ Framework: PyTorch 1.8.0  or higher
 
 The workflow of DA-ID-LSM is shown in the figure below. Migrated images from both synthetic (source) and field (target) domains are fed into the U-Net. The network's training is guided by two loss functions: a Mean Squared Error (MSE) loss to ensure accurate reconstruction of the synthetic data against its true reflectivity label, and an MMD loss to align the feature distributions of the source and target domain outputs.
 <img src="https://github.com/C-ZZK/high-resolution-imaging-code/blob/main/Figure1.png" width="600">
+
+# Project Structure
+For the scripts to run correctly, please organize your project directory as follows:
+```python
+├── checkpoints4train/      # To save/load trained model weights (.pth files)
+├── data/
+│   ├── seam/               # For target (real-world) data
+│   │   ├── seam_mig.dat    # RTM image of the target area
+│   │   ├── ImgPSFdeblur.dat    # ID-LSM image of the target area
+│   │   ├── deconvPythonShow.py    # Plot code
+│   │   ├── model_ref_1501x1751_8x8.dat    # True reflectivity of seam
+│   │   └── PSF.dat         # Point Spread Function (PSF) of the target area
+│   └── ref.dat             # True reflectivity model (e.g., Marmousi) for training
+├── model/                  # Contains model definition scripts (e.g., Trainer.py)
+│   ├──  Trainer.py
+│   ├──  unetm.py           # U-Net structure
+├── utils/                  # Contains utility scripts (e.g., configs, data loaders)
+│   ├── config.py
+│   ├── config4train2.py    # hyperparameter for  train
+│   ├── dataset2.py         # dataset function
+│   ├── mmd.py              # MMD function
+│   └── ormsby.py
+├── result/                 # Output directory for train.py (loss plot, intermediate test images)
+├── testresult/             # Output directory for the final result from test.py
+├── train.py                # Script to train the model
+├── test.py                 # Script to apply the model for testing
+└── README.md               # This file
+```
+Note: The model/ and utils/ directories, which contain the model implementation and helper functions, must be created and populated with the necessary scripts.
 
 ## 1. Training the Model(train.py)
 To run the below cells, you must first import the library:
@@ -78,27 +107,59 @@ PSFBx = 11    # PSF_Initial  Central coordinate
 PSFBz = 11    # PSF_Initial   Central coordinate
 
 ```
+# Loss function 
+ Loss function in the trainer.py,loss1 is MSE loss, loss2 is MMD loss.
+ ```python
+ loss1 = self.lossMSE(outimg, ref)
+ loss2 = self.lossmmd(data_out,target1)
+ loss = loss1 +  0.02*loss2
+```
 # Execute the training script
 ```python
 python train.py
 ```
+# Train process 
+Once training begins, you can monitor its progress and observe the final loss function.
+<img src="https://github.com/C-ZZK/high-resolution-imaging-code/blob/main/Figure5.png" width="600">
+<img src="https://github.com/C-ZZK/high-resolution-imaging-code/blob/main/Figure6.png" width="600">
 
 ## 2. Testing the Model (test.py)
 The testing script applies a trained model to a large target image (e.g., model_image_1501x1751.dat). It uses a sliding window to process the image patch by patch and stitches the results together.
 
-Before running, you must update test.py to point to your trained model checkpoint.
+Before running, you must update test.py to point to your trained model checkpoint.Inside test.py, set the path to your trained model
 
-The initial Channel object can be created using the 'generate_initial_channel' function. This creates a straight line, with some noise added. However, a Channel can be created (and then used as the first channel in a ChannelBelt) using any set of x,y,z,W,D variables.
-# Inside test.py, set the path to your trained model
+```python
 modelpath = './checkpoints4train/Network_36.pth'
+```
 
 Execute the test script from your terminal:
 ```python
 python test.py
 ```
+
 The final high-resolution output will be saved as a binary .dat file (result_seam.dat) in the testresult/ directory. The image below shows an example of a low-resolution input and the corresponding high-resolution output from the model.
 <img src="https://github.com/C-ZZK/high-resolution-imaging-code/blob/main/Figure2.png" width="600">
 <img src="https://github.com/C-ZZK/high-resolution-imaging-code/blob/main/Figure3.png" width="600">
+
+## 3. Visualize the results (deconvPythonShow.py)
+To visualize the results, run the deconvPythonShow.py script located in the ./data/seam/ . This will generate four images: the conventional RTM result, the ID-LSM result, the DA-ID-LSM result, and the true reflectivity model.
+```python
+./data/seam/
+```
+
+
+# Related Publications
+If you use this project in your work, please consider citing the original research that inspired it. For example, you can cite relevant papers on deep learning applications in seismic interpretation or deconvolution.
+
+# Acknowledgements
+This project was inspired by recent advancements in applying deep learning to geophysical problems. We acknowledge the open-source community and the creators of standard datasets like the Marmousi model, which are invaluable for training and validation.
+
+# License
+This project is licensed under the Apache License 2.0. See the LICENSE.txt file for more details.
+
+
+
+
 The core functionality of 'meanderpy' is built into the 'migrate' method of the 'ChannelBelt' class. This is the function that computes migration rates and moves the channel centerline to its new position. The last Channel of a ChannelBelt can be further migrated through applying the 'migrate' method to the ChannelBelt instance.
 
 ```python
