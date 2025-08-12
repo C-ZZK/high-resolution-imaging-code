@@ -111,7 +111,7 @@ def train(data1, ref2,Kernel,target):
 
         # Loop through the training data using tqdm for a progress bar.
         for ii, (dd, rr, tt) in tqdm(enumerate(train_dataloader), total=len(train_dataloader)):
-            # ------------训练-------------
+            # ------------train-------------
             trainer.train()
             loss = trainer.train_onebatch2(dd.cuda(), rr.cuda(),tt.cuda())
             los = loss.detach().cpu().numpy()
