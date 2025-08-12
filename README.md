@@ -186,6 +186,7 @@ If you don't want to deal with any local Python environments and installations, 
 If you use this project in your work, please consider citing one or more of these publications:
 
 Gretton, A., Borgwardt, K.M., Rasch, M.J., Schölkopf, B., Smola, A.J., 2007. A kernel method for the two-sample problem. Advances in Neural Information Processing Systems 19, 513–520.
+
 Liu, S., Ni, W., Fang, W., Fu, L., 2023. Absolute acoustic impedance inversion using convolutional neural networks with transfer learning. Geophysics 88, R163-R174.
 
 # Acknowledgements
