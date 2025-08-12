@@ -3,13 +3,13 @@ import torch.nn as nn
 
 class MMDLoss(nn.Module):
     '''
-    计算源域数据和目标域数据的MMD距离
+    MMD caculation
     Params:
-    source: 源域数据（n * len(x))
-    target: 目标域数据（m * len(y))
+    source: source data（n * len(x))
+    target: target data（m * len(y))
     kernel_mul:
-    kernel_num: 取不同高斯核的数量
-    fix_sigma: 不同高斯核的sigma值
+    kernel_num: gaussian kernel num
+    fix_sigma:  gaussian kernel sigma
     Return:
     loss: MMD loss
     '''
@@ -58,17 +58,3 @@ class MMDLoss(nn.Module):
             YX = torch.mean(kernels[batch_size:, :batch_size])
             loss = torch.mean(XX + YY - XY - YX)
             return loss
-# if __name__ =='__main__':
-#     source = torch.rand(20,1,128, 128)  # 模拟产生batch=64，channel=3， hight=128， width=128 的源域图片数据
-#     target = torch.rand(20,1,128, 128)  # 模拟产生batch=32，channel=3， hight=128， width=128 的源域图片数据
-#     source1 = source.view(20,128*128)
-#     target1 = target.view(20,128*128)
-#     Fclayer = nn.Linear(128*128,1000)
-#     source2 = Fclayer(source1)
-#     target2 = Fclayer(target1)
-#     MMD = MMDLoss()
-#     loss = MMD(source=source2, target=target2)
-#     loss1 = MMD(source=source1, target=target1)
-#
-#     print(loss)
-#     print(loss1)
