@@ -153,9 +153,9 @@ if __name__ == '__main__':
     # 2. Load and process Point Spread Functions (PSFs) for the target area.
     # The PSF describes the response of an imaging system to a point source.
     target_PSF1 = np.fromfile('./data/seam/PSF.dat', dtype=np.float32)
-    PSF_2d1 = target_PSF1.reshape((21, 21), order='F')
+    PSF_2d1 = target_PSF1.reshape((21, 21,1), order='F')
     PSF_2d1 = PSF_2d1 /np.max(np.abs(PSF_2d1))
-
+    Kernel1 = PSF_2d1
     # # --- Parameters for extracting PSF kernels ---
     # PSFLx = 21    # Central coordinate interval
     # PSFLz = 21   # Central coordinate interval
