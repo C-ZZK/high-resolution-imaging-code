@@ -29,7 +29,7 @@ Framework: PyTorch 1.8.0  or higher
 
 ## Usage
 
-<img src="https://raw.githubusercontent.com/zsylvester/meanderpy/master/meanderpy_sketch.png" width="600">
+<img src="https://github.com/C-ZZK/high-resolution-imaging-code/blob/main/Figure1.png" width="600">
 
 The workflow of DA-ID-LSM is shown in the figure below. Migrated images from both synthetic (source) and field (target) domains are fed into the U-Net. The network's training is guided by two loss functions: a Mean Squared Error (MSE) loss to ensure accurate reconstruction of the synthetic data against its true reflectivity label, and an MMD loss to align the feature distributions of the source and target domain outputs.
 
