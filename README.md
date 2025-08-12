@@ -146,7 +146,8 @@ The final high-resolution output will be saved as a binary .dat file (result_sea
 ## 3. Visualize the results (deconvPythonShow.py)
 To visualize the results, run the deconvPythonShow.py script located in the ./data/seam/ . This will generate four images: the conventional RTM result, the ID-LSM result, the DA-ID-LSM result, and the true reflectivity model.
 ```python
-./data/seam/
+cd ./data/seam/]
+
 python deconvPythonShow.py
 ```
 # RTM result
