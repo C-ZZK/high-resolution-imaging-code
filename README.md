@@ -2,59 +2,78 @@
 
 ## Description
 
-'meanderpy' is a Python module that implements a simple numerical model of meandering, the one described by Howard & Knutson in their 1984 paper ["Sufficient Conditions for River Meandering: A Simulation Approach"](https://agupubs.onlinelibrary.wiley.com/doi/abs/10.1029/WR020i011p01659). This is a kinematic model that is based on computing migration rate as the weighted sum of upstream curvatures; flow velocity does not enter the equation. Curvature is transformed into a 'nominal migration rate' through multiplication with a migration rate (or erodibility) constant; in the  Howard & Knutson (1984) paper this is a nonlinear relationship based on field observations that suggested a complex link between curvature and migration rate. In the 'meanderpy' module we use a simple linear relationship between the nominal migration rate and curvature, as recent work using time-lapse satellite imagery suggests that high curvatures result in high migration rates ([Sylvester et al., 2019](https://doi.org/10.1130/G45608.1)).
+DA-ID-LSM is a Python framework for Domain-Adaptive Image-Domain Least-Squares Migration using deep learning. It is designed to overcome the critical challenge of feature discrepancies between synthetic and field seismic data, a common issue that limits the field seismic data applicability of deep learning models in geophysics.The method leverages a U-Net based convolutional neural network to learn the complex, nonlinear mapping from a conventional migrated seismic image to a high-resolution subsurface reflectivity model. A key innovation is the integration of a Maximum Mean Discrepancy (MMD) loss function during training. This explicitly minimizes the statistical distribution gap between the features of synthetic training data (source domain) and field data (target domain), enabling the network to learn domain-invariant features. This ensures that the model generalizes effectively from synthetic examples to field seismic data applications. The result is a robust and efficient workflow that produces images with higher resolution, enhanced signal-to-noise ratios, and better lateral continuity compared to conventional RTM and standard ID-LSM methods. 
+
 
 ## Installation
 
-<code>pip install meanderpy</code>
+git clone https://github.com/C-ZZK/high-resolution-imaging-code.git
+cd high-resolution-imaging-code
+pip install -r requirements.txt
 
 ## Requirements
 
 - numpy
+- os
+- PyTorch
 - matplotlib
 - scipy
 - PIL
 - numba
 - scikit-image
 - tqdm
-- jupyter
+- OpenCV-Python
+  
+Language: Python 3.8 or higher
+Framework: PyTorch 1.8.0  or higher
 
 ## Usage
 
 <img src="https://raw.githubusercontent.com/zsylvester/meanderpy/master/meanderpy_sketch.png" width="600">
 
-The sketch above shows the three 'meanderpy' components: channel, cutoff, channel belt. These are implemented as classes; a 'Channel' and a 'Cutoff' are defined by their width, depth, and x,y,z centerline coordinates, and a 'ChannelBelt' is a collection of channels and cutoffs. In addition, the 'ChannelBelt' object also has a 'cl_times' and a 'cutoff_times' attribute that specify the age of the channels and the cutoffs. This age is relative to the start time of the simulation (= the first channel, age = 0.0).
+The workflow of DA-ID-LSM is shown in the figure below. Migrated images from both synthetic (source) and field (target) domains are fed into the U-Net. The network's training is guided by two loss functions: a Mean Squared Error (MSE) loss to ensure accurate reconstruction of the synthetic data against its true reflectivity label, and an MMD loss to align the feature distributions of the source and target domain outputs.
 
+1. Training the Model
 To run the below cells, you must first import the library:
 
 ```python
-import meanderpy as mp
+import os
+import cv2
 import numpy as np
+import scipy.io as io
+import scipy.signal
+from scipy.interpolate import interp1d
+import torch
+from torch.utils import data as data_
+from tqdm import tqdm
+from torchvision import transforms as tfs
+from model.Trainer import InpTrainer
+from utils.config4train2 import opt
+from utils.dataset2 import Dataset
+from utils.ormsby import ormsby_wavelet
+from scipy.io import savemat
+import matplotlib.pyplot as plt
+from scipy.signal import savgol_filter
+from scipy.ndimage import gaussian_filter
+from scipy.signal import butter, filtfilt
 ```
+The model is trained using pairs of conventional migrated images and their corresponding true reflectivity models (for the synthetic source domain), alongside unlabeled migrated images from the field (target domain).
+Key parameters and the training process are managed within the Python scripts. The Adam optimizer is used to update network parameters.
 
 A reasonable set of input parameters are as follows:
-
 ```python
-nit = 1500                   # number of iterations
-W = 200.0                    # channel width (m)
-D = 6.0                      # channel depth (m)
-depths = D * np.ones((nit,))  # channel depths for different iterations
-pad = 100                    # padding (number of nodepoints along centerline)
-deltas = 50.0                # sampling distance along centerline
-Cfs = 0.011 * np.ones((nit,)) # dimensionless Chezy friction factor
-crdist = 2 * W               # threshold distance at which cutoffs occur
-kl = 60.0/(365*24*60*60.0)   # migration rate constant (m/s)
-kv =  1.0e-12               # vertical slope-dependent erosion rate constant (m/s)
-dt = 2*0.05*365*24*60*60.0     # time step (s)
-dens = 1000                  # density of water (kg/m3)
-saved_ts = 20                # which time steps will be saved
-n_bends = 30                 # approximate number of bends you want to model
-Sl = 0.0                     # initial slope (matters more for submarine channels than rivers)
-t1 = 500                    # time step when incision starts
-t2 = 700                    # time step when lateral migration starts
-t3 = 1200                    # time step when aggradation starts
-aggr_factor = 2e-9         # aggradation factor (m/s, about 0.18 m/year, it kicks in after t3)
+
+nz = 1500  # nz
+nx = 1751  # nx
+ee =1  # epoch
+cropsize = 128   # cropsize
+num_train_dataset = 5000  # dataset of train
+num_test_dataset = 2000   # dataset of validation
+batch_size = 20  # train batch_size
+
 ```
+# Execute the training script
+python train.py
 
 The initial Channel object can be created using the 'generate_initial_channel' function. This creates a straight line, with some noise added. However, a Channel can be created (and then used as the first channel in a ChannelBelt) using any set of x,y,z,W,D variables.
 
