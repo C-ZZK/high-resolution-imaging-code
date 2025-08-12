@@ -165,6 +165,20 @@ python deconvPythonShow.py
 
 <img src="https://github.com/C-ZZK/high-resolution-imaging-code/blob/main/ref.png" width="600">
 
+## Google Colab notebook
+
+If you don't want to deal with any local Python environments and installations, you should be able to run meanderpy in [this Google Colab notebook](https://colab.research.google.com/drive/119cnd_cEKT2Zdwv4AuFAHG-p8bIVI3A9?usp=sharing).
+
+```python
+%run setup.py install
+
+%run /content/high-resolution-imaging-code-main/DA-ID-LSM/train.py
+
+%run /content/high-resolution-imaging-code-main/DA-ID-LSM/test.py
+
+%run /content/high-resolution-imaging-code-main/data/seam/deconvPythonShow.py
+```
+
 
 # Related Publications
 If you use this project in your work, please consider citing one or more of these publications:
@@ -182,9 +196,6 @@ This project is licensed under the [Apache License 2.0](https://github.com/C-ZZK
 
 
 
-## Google Colab notebook
-
-If you don't want to deal with any local Python environments and installations, you should be able to run meanderpy in [this Google Colab notebook](https://colab.research.google.com/drive/1eZgGD_eXddaAeqxmI9guGIcTjjrLXmKO?usp=sharing).
 
 
 
