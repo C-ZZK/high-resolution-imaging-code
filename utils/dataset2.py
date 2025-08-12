@@ -48,8 +48,8 @@ class Dataset(dataset.Dataset):
         kernelsize_x =self.kernelsize_x
         # hpsf = random.randint(0, 8)
         # wpsf = random.randint(0, 19)
-        npsf = Kernel.shape[2]
-        ipsf = random.randint(50,50)
+        # npsf = Kernel.shape[2]
+        ipsf = 0
         if self.mode == 'train':
 
             Kernel = Kernel[:,:,ipsf]
