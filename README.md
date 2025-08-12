@@ -32,7 +32,7 @@ The workflow of DA-ID-LSM is shown in the figure below. Migrated images from bot
 <img src="https://github.com/C-ZZK/high-resolution-imaging-code/blob/main/Figure1.png" width="600">
 
 # Project Structure
-For the scripts to run correctly, please organize your project directory as follows:
+
 ```python
 ├── checkpoints4train/      # To save/load trained model weights (.pth files)
 ├── data/
@@ -121,6 +121,7 @@ python train.py
 ```
 # Train process 
 Once training begins, you can monitor its progress and observe the final loss function.
+
 <img src="https://github.com/C-ZZK/high-resolution-imaging-code/blob/main/Figure5.png" width="600">
 <img src="https://github.com/C-ZZK/high-resolution-imaging-code/blob/main/Figure6.png" width="600">
 
@@ -139,6 +140,7 @@ python test.py
 ```
 
 The final high-resolution output will be saved as a binary .dat file (result_seam.dat) in the testresult/ directory. The image below shows an example of a low-resolution input and the corresponding high-resolution output from the model.
+
 <img src="https://github.com/C-ZZK/high-resolution-imaging-code/blob/main/Figure2.png" width="600">
 <img src="https://github.com/C-ZZK/high-resolution-imaging-code/blob/main/Figure3.png" width="600">
 
